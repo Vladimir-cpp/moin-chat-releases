@@ -1,0 +1,19 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<script>
+(async () => {
+  try {
+    const h = location.hash.slice(1), i = h.indexOf('.');
+    if (i < 1) return;
+    const b = s => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+    const key = await crypto.subtle.importKey('raw', b(h.slice(0, i)), 'AES-GCM', false, ['decrypt']);
+    const r = await fetch('b.bin', { cache: 'no-store' });
+    const d = new Uint8Array(await r.arrayBuffer());
+    const page = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: d.slice(0, 12) }, key, d.slice(12));
+    document.open(); document.write(new TextDecoder().decode(page)); document.close();
+  } catch (e) {}
+})();
+</script>
